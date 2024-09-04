@@ -1,5 +1,0 @@
-numpy
-pillow
-pydantic
-requests
-shapely
