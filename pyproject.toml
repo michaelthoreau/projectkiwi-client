@@ -12,4 +12,4 @@ dependencies = [
   "numpy",
   "pillow"
 ]
-readme = {file = "README.rst", content-type = "text/x-rst"}
+readme = "README.md"
