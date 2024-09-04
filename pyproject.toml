@@ -1,0 +1,14 @@
+[build-system]
+requires = ["flit_core >=3.4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "projectkiwi"
+authors = [{name = "Michael Thoreau", email = "michael@projectkiwi.io"}]
+dynamic = ["version", "description"]
+dependencies = [
+  "requests",
+  "pydantic",
+  "numpy",
+  "pillow"
+]
