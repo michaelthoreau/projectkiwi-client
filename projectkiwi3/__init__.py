@@ -26,4 +26,4 @@ License:
 # your_package/__init__.py
 from .Client import Client
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
