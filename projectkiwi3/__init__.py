@@ -1,18 +1,18 @@
 """
-projectkiwi
+projectkiwi3
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module is a means for interfacing with projectkiwi using python.
 
 
 Classes:
-    - ProjectkiwiClient: A class to interface with project kiwi
+    - Client: A class to interface with project kiwi
 
 Example:
     To get started, try this:
 
-    >>> from projectkiwi import ProjectkiwiClient
-    >>> client = ProjectKiwiClient("my_key)
+    >>> from projectkiwi3 import Client
+    >>> client = Client("my_key)
 
 
 Author:

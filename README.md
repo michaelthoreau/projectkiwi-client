@@ -5,16 +5,16 @@ Tools to interact with projectkiwi.io
 
 ### Installation
 ```Bash
-pip install projectkiwi3-client
+pip install projectkiwi3
 ```
 
 
 ### Getting Started
 ```
-import projectkiwi3-client
+import projectkiwi3
 
 
-client = projectkiwi.Client("MY_API_KEY")
+client = projectkiwi3.Client("MY_API_KEY")
 projects = client.getProjects()
 
 ```

@@ -1,5 +1,5 @@
 import requests
-from projectkiwi.models import Project, Annotation, Label, LabelingQueue, LabelingTask, Imagery
+from projectkiwi3.models import Project, Annotation, Label, LabelingQueue, LabelingTask, Imagery
 import numpy as np
 from typing import List
 from PIL import Image
