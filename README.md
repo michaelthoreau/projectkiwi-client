@@ -2,6 +2,8 @@
 
 This package adds a basic python interface for the projectkiwi api. 
 
+- :notebook: [Take a look at this example notebook for some application ideas!](https://colab.research.google.com/drive/19EjbdsEQj-fckpkj1QWuaHdTJDPzPjrn?usp=sharing)
+
 ### Installation
 ```
 pip install projectkiwi3
