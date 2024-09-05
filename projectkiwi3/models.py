@@ -71,6 +71,8 @@ class LabelingTask(BaseModel):
             coordinates = coords
         )
     
+    
+    
 
 # model LabelingQueue {
 #   id                   Int                    @id @default(autoincrement())
@@ -92,7 +94,6 @@ class LabelingQueue(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict):
-        print(data)
         return cls(
             id = data['id'],
             name = data['name'],
@@ -128,7 +129,6 @@ class Label(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict):
-        # print(data)
         return cls(
             id = data['id'],
             name = data['name'],
@@ -209,7 +209,6 @@ class Project(BaseModel):
 
     @classmethod
     def from_dict(cls, data: dict):
-        # print(data)
         return cls(
             id = data['id'],
             name = data['name'],

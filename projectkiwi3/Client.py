@@ -41,6 +41,14 @@ class Client():
         resp.raise_for_status()
         return resp.json()
     
+    def post(self, url, json: dict) -> any:
+        if "localhost" in self.url:
+            resp = requests.post(url, json=json, verify=False, headers={'x-api-key': self.key})
+        else:
+            resp = requests.post(url, json=json, headers={'x-api-key': self.key})
+        resp.raise_for_status()
+        return resp.json()
+    
     def getProjects(self) -> List[Project]:
         json = self.get(f"{self.url}/api/project")
         projects: List[Project] = [Project.from_dict(projectDict) for projectDict in json]
@@ -67,7 +75,17 @@ class Client():
         return imagery
 
     
-    def getImageForTask(self, imagery: Imagery, coordinates: List[List[float]]) -> np.array:
+    def getImageForTask(self, imagery: Imagery, coordinates: List[List[float]], max_size: int = 1024) -> np.array:
+        """Get a numpy array for a given imagery layer and set of coordinates
+
+        Args:
+            imagery (Imagery): Imagery layer to extract image from
+            coordinates (List[List[float]]): coordiantes in [[lng,lat], [lng,lat]] format
+            max_size (int, optional): maximum width for the image. Defaults to 1024.
+
+        Returns:
+            np.array: image
+        """          
         if not imagery.downloadUrl:
             imagery.downloadUrl = self.get(f"{self.url}/api/imagery/{imagery.id}/download_url")
 
@@ -82,13 +100,22 @@ class Client():
         r = requests.post("https://api.projectkiwi.io/v3/get_part", 
                             json={'polygon': featureDict,
                             'cog_url':imagery.downloadUrl,
-                            'max_size': 2048,
+                            'max_size': max_size,
                             'base64': False
         })
         r.raise_for_status()
         image = Image.open(io.BytesIO(base64.decodebytes(bytes(r.text, "utf-8"))))
         return np.asarray(image)
     
+
+    def addAnnotation(self, projectId: int, coordinates: List[List[float]], shape: str, labelId: int) -> Annotation:
+        json = self.post(f"{self.url}/api/project/{projectId}/annotations", json={
+            "coordinates": coordinates,
+            "shape": shape,
+            "labelId": labelId
+        })
+        newAnnotation: Annotation = Annotation.from_dict(json)
+        return newAnnotation
 
 
     # def getImageForTask(self, imageryId: int, coordinates: List[List[float]]) -> np.array:
