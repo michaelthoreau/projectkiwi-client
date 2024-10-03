@@ -5,6 +5,7 @@ from typing import List
 from PIL import Image
 import io
 import base64
+import shapely
 
 class Client():
     def __init__(self, key: str, url:str ="https://projectkiwi.io"):
@@ -133,20 +134,35 @@ class Client():
         return imagery
 
     
-    def getImageForTask(self, imagery: Imagery, coordinates: List[List[float]], max_size: int = 1024) -> np.array:
+    def getImageForTask(self, imagery: Imagery, coordinates: List[List[float]], max_size: int = 1024, padding_factor: float = None) -> np.array:
         """Get a numpy array for a given imagery layer within a set of coordinates.
 
         Args:
             imagery (Imagery): Imagery layer to extract image from
             coordinates (List[List[float]]): coordinates in [[lng,lat], [lng,lat]] format
             max_size (int, optional): maximum width for the image. Defaults to 1024.
+            padding_factor(float, optional): How much space to pad on each size. e.g. 0.2 will add 20% to each side
 
         Returns:
             np.array: image, which may include black borders for irregular shapes or at edges of layer.
-        """          
+        """       
+
+
+        if padding_factor:
+            print(coordinates)
+            # Create the polygon
+            polygon = shapely.Polygon(coordinates)
+            print(polygon)
+
+            scaled_polygon = shapely.affinity.scale(polygon, xfact=1+(2*padding_factor), yfact=1+(2*padding_factor))
+            coordinates = list(scaled_polygon.exterior.coords)
+            print(f"scaled coordinates: {coordinates}")
+
         if not imagery.downloadUrl:
             imagery.downloadUrl = self.get(f"{self.url}/api/imagery/{imagery.id}/download_url")
 
+
+        
         featureDict = {
             "type": "Feature",
             "properties": {},

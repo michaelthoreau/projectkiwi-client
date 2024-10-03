@@ -12,7 +12,8 @@ dependencies = [
   "requests",
   "pydantic",
   "numpy",
-  "pillow"
+  "pillow",
+  "shapely"
 ]
 
 
