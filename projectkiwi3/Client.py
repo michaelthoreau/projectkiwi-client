@@ -149,14 +149,9 @@ class Client():
 
 
         if padding_factor:
-            print(coordinates)
-            # Create the polygon
             polygon = shapely.Polygon(coordinates)
-            print(polygon)
-
             scaled_polygon = shapely.affinity.scale(polygon, xfact=1+(2*padding_factor), yfact=1+(2*padding_factor))
             coordinates = list(scaled_polygon.exterior.coords)
-            print(f"scaled coordinates: {coordinates}")
 
         if not imagery.downloadUrl:
             imagery.downloadUrl = self.get(f"{self.url}/api/imagery/{imagery.id}/download_url")
