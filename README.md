@@ -72,7 +72,7 @@ labelingQueues = client.getLabelingQueues(project.id)
 labelingQueue = labelingQueues[-1]
 
 # find imagery layer to use - every geotiff you upload creates an imagery layer
-imageryLayer = client.getImagery(project.id)[-1]
+imageryLayer = client.getAllImagery(project.id)[-1]
 
 # Preview an image for a single task within the labeling queue
 task = labelingQueue.labelingTasks[-1]

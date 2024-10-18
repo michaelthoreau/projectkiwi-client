@@ -27,4 +27,4 @@ License:
 from .Client import Client
 from .utils import boxToLngLatPolygon
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"

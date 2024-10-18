@@ -1,13 +1,15 @@
 import requests
 from projectkiwi3.models import Project, Annotation, Label, LabelingQueue, LabelingTask, Imagery
 import numpy as np
-from typing import List
+from typing import List, Dict
 from PIL import Image
 import io
 import base64
 import shapely
 
 class Client():
+    imageryUrls: Dict[int, str] = {}
+
     def __init__(self, key: str, url:str ="https://projectkiwi.io"):
         """constructor
 
@@ -62,7 +64,15 @@ class Client():
         resp.raise_for_status()
         return resp.json()
     
+    def getProject(self, projectId: int) -> List[Project]:
+        """Get project details.
 
+        Returns:
+            Project: Project details
+        """
+        json = self.get(f"{self.url}/api/project/{projectId}")
+        project: Project = Project.from_dict(json)
+        return project
 
     def getProjects(self) -> List[Project]:
         """Get a list of projects for the user.
@@ -118,9 +128,21 @@ class Client():
         queues: List[LabelingQueue] = [LabelingQueue.from_dict(dict) for dict in json]
         return queues
     
+    def getLabelingQueue(self, id: int) -> LabelingQueue:
+        """ Get labeling queue for a given id
 
+        Args:
+            id (int): The ID of the labeling queue, sometimes called 'labeling workflow' e.g. 421
+
+        Returns:
+            LabelingQueue: The labelingQueue
+        """
+        json = self.get(f"{self.url}/api/labelingQueue/{id}")
+        queue: LabelingQueue = LabelingQueue.from_dict(json)
+        return queue
     
-    def getImagery(self, projectId: int) -> List[Imagery]:
+    
+    def getAllImagery(self, projectId: int) -> List[Imagery]:
         """ Get all imagery layers (geotiffs) for the project
 
         Args:
@@ -132,13 +154,26 @@ class Client():
         json = self.get(f"{self.url}/api/project/{projectId}/imagery")
         imagery: List[Imagery] = [Imagery.from_dict(dict) for dict in json]
         return imagery
+    
+    def getImagery(self, imageryId: int) -> Imagery:
+        """ Get a single imagery layer
+
+        Args:
+            imageryId (int): The ID of the imagery layer e.g. 869
+
+        Returns:
+            Imagery: The imagery layers
+        """        
+        json = self.get(f"{self.url}/api/imagery/{imageryId}")
+        imagery: Imagery = Imagery.from_dict(json) 
+        return imagery
 
     
-    def getImageForTask(self, imagery: Imagery, coordinates: List[List[float]], max_size: int = 1024, padding_factor: float = None) -> np.array:
+    def getImageForTask(self, imageryId: int, coordinates: List[List[float]], max_size: int = 1024, padding_factor: float = None) -> np.array:
         """Get a numpy array for a given imagery layer within a set of coordinates.
 
         Args:
-            imagery (Imagery): Imagery layer to extract image from
+            imageryId (int): Id of Imagery layer to extract image from
             coordinates (List[List[float]]): coordinates in [[lng,lat], [lng,lat]] format
             max_size (int, optional): maximum width for the image. Defaults to 1024.
             padding_factor(float, optional): How much space to pad on each size. e.g. 0.2 will add 20% to each side
@@ -153,10 +188,10 @@ class Client():
             scaled_polygon = shapely.affinity.scale(polygon, xfact=1+(2*padding_factor), yfact=1+(2*padding_factor))
             coordinates = list(scaled_polygon.exterior.coords)
 
-        if not imagery.downloadUrl:
-            imagery.downloadUrl = self.get(f"{self.url}/api/imagery/{imagery.id}/download_url")
 
-
+        if not imageryId in self.imageryUrls:
+            self.imageryUrls[imageryId] = self.get(f"{self.url}/api/imagery/{imageryId}/download_url")
+        
         
         featureDict = {
             "type": "Feature",
@@ -168,7 +203,7 @@ class Client():
         }
         r = requests.post("https://api.projectkiwi.io/v3/get_part", 
                             json={'polygon': featureDict,
-                            'cog_url':imagery.downloadUrl,
+                            'cog_url': self.imageryUrls[imageryId],
                             'max_size': max_size,
                             'base64': False
         })

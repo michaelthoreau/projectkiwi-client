@@ -27,7 +27,6 @@ class Imagery(BaseModel):
     error: bool
     storageSizeKB: Optional[int]
     modifiedAt: str
-    downloadUrl: Optional[str] = None
     
     @classmethod
     def from_dict(cls, data: dict):
