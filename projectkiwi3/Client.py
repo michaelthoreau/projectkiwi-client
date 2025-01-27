@@ -1,5 +1,5 @@
 import requests
-from projectkiwi3.models import Project, Annotation, Label, LabelingQueue, LabelingTask, Imagery
+from projectkiwi3.models import Project, Annotation, Label, LabelingQueue, LabelingTask, Imagery, AnnotationPayload
 import numpy as np
 from typing import List, Dict
 from PIL import Image
@@ -61,7 +61,11 @@ class Client():
             resp = requests.post(url, json=json, verify=False, headers={'x-api-key': self.key})
         else:
             resp = requests.post(url, json=json, headers={'x-api-key': self.key})
-        resp.raise_for_status()
+        try:
+            resp.raise_for_status()
+        except Exception as e:
+            print(f"Failed to POST, reason: {resp.text}")
+            raise e
         return resp.json()
     
     def getProject(self, projectId: int) -> List[Project]:
@@ -221,7 +225,7 @@ class Client():
 
         Returns:
             Label: The created label
-        """        
+        """   
         json = self.post(f"{self.url}/api/project/{projectId}/labels", json={
             "name": name,
             "color": color,
@@ -230,12 +234,17 @@ class Client():
         newLabel: Label = Label.from_dict(json)
         return newLabel
 
-    def addAnnotation(self, projectId: int, coordinates: List[List[float]], shape: str, labelId: int, confidence: float = 1.0) -> Annotation:
+    def addAnnotation(self, projectId: int, 
+                      coordinates: List[List[float]], 
+                      shape: str, 
+                      labelId: int, 
+                      confidence: float = 1.0) -> Annotation:
         """Add an annotation to the project
 
         Args:
             projectId (int): ID of the project
-            coordinates (List[List[float]]): coordinates in [[lng,lat], [lng,lat]] format. For Polygons, first and last coordinate should match.
+            coordinates (List[List[float]]): coordinates in [[lng,lat], [lng,lat]] format. 
+                    For Polygons, first and last coordinate should match.
             shape (str): Shape of the annotation, must be one of: Point, Polygon, Linestring
             labelId (int): Id of the label to assign to the annotation
             confidence (float): Confidence in the annotation e.g. 0.6. Defaults to 1.0.
@@ -254,3 +263,35 @@ class Client():
         })
         newAnnotation: Annotation = Annotation.from_dict(json)
         return newAnnotation
+    
+    def addAnnotations(self, projectId: int, annotations: List[AnnotationPayload]) -> Annotation:
+        """Add multiple annotations to the project
+
+        Args:
+            projectId (int): ID of the project
+            annotations (List[AnnotationPayload]): list of annotations to add to project
+
+        Returns:
+            Annotations: The resulting created annotations.
+        """
+
+        annotationPayloadJSON = []
+        for anno in annotations:
+            annotationPayloadJSON.append(anno.toJSON())
+        json = self.post(f"{self.url}/api/project/{projectId}/annotations/multiple", json=annotationPayloadJSON)
+
+        return [Annotation.from_dict(annoJSON) for annoJSON in json]
+
+    def createProject(self, name: str) -> Project:
+        """Create a new project
+
+        Args:
+            name (str): Project name
+
+        Returns:
+            Project: The resulting created annotation.
+        """
+
+        json = self.post(f"{self.url}/api/project", json=name)
+
+        return Project.from_dict(json)
